@@ -130,6 +130,8 @@ bool uninstallRootLessJB(void);
 bool verifyECID(NSString *ecid);
 bool canOpen(const char *URL);
 bool airplaneModeEnabled(void);
+bool pidFileIsValid(NSString *pidfile);
+bool pspawnHookLoaded(void);
 
 extern NSData *lastSystemOutput;
 
