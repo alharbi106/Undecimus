@@ -718,6 +718,7 @@ void jailbreak()
     bool sshOnly = false;
     time_t start_time = time(NULL);
     bool useSubstitute = false;
+    bool persistRootFSChanges = true;
 #define INSERTSTATUS(x) do { \
     [status appendString:x]; \
 } while (false)
@@ -1355,6 +1356,19 @@ void jailbreak()
             _assert(fs_snapshot_create(rootfd, origfs, 0) == ERR_SUCCESS, message, true);
             _assert(snapshot_check(rootfd, origfs), message, true);
             LOG("Successfully created system snapshot.");
+        }
+        if (!persistRootFSChanges && kCFCoreFoundationVersionNumber >= 1452.23) {
+            const char **snapshots = snapshot_list(rootfd);
+            _assert(snapshots != NULL, message, true);
+            const char *snapshot = *snapshots;
+            _assert(snapshot != NULL, message, true);
+            char *systemSnapshot = copySystemSnapshot();
+            _assert(systemSnapshot != NULL, message, true);
+            _assert(fs_snapshot_rename(rootfd, snapshot, systemSnapshot, 0) == ERR_SUCCESS, message, true);
+            free(systemSnapshot);
+            systemSnapshot = NULL;
+            free(snapshots);
+            snapshots = NULL;
         }
         close(rootfd);
         LOG("Successfully remounted RootFS.");
